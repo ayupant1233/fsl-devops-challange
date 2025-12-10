@@ -10,12 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6.0.1
-
-    - name: Install Dependencies
-      run: cd codebase/rdicidr-0.1.0 && npm ci
-    
-    - name: Lint code
-      run: cd codebase/rdicidr-0.1.0 && npm run lint
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 15
+    - run: npm ci
+    - run: npm test
 
 

@@ -28,7 +28,7 @@ jobs:
                 --password-stdin ${{ secrets.ECR_REPO_URL }}
       - name: Build image
         run: |
-          docker build -t  ${{ secrets.ECR_REPO_URL }}:v1 -f codebase/rdicidr-0.1.0/Dockerfile
+          docker build -t  ${{ secrets.ECR_REPO_URL }}:v1 -f codebase/rdicidr-0.1.0/Dockerfile codebase/rdicidr-0.1.0
 
       - name: Push to ECR
         run: docker push ${{ secrets.ECR_REPO_URL }}:v1

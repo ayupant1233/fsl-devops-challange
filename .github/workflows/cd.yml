@@ -1,0 +1,49 @@
+name: CD from ECR to EC2
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: action/checkout@v3
+      
+      - name: configure AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: login ECR
+        run: |
+           aws ecr get-login-password \
+               --region ${{ secrets.AWS_REGION }} \
+            | docker login \
+                --username AWS \
+                --password-stdin ${{ secrets.ECR_REPO_URL }}
+      - name: Build image
+        run: |
+          docker build -t  ${{ secrets.ECR_REPO_URL }}:v1 -f codebase/rdicidr-0.1.0/Dockerfile
+
+      - name: Push to ECR
+        run: docker push ${{ secrets.ECR_REPO_URL }}:v1
+
+      - uses: actions/checkout@v2 
+      - name: Build & Deploy
+        env:
+            PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+            HOSTNAME: ${{ secrets.EC2_HOST }}
+            USER_NAME: ${{secrets.EC2_USER}}
+      
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+          docker pull ${{ secrets.ECR_REPO_URL }}:v1
+          docker stop fsl-dev || true
+          docker rm fsl-dev || true
+          docker run -d -p 8080:8080 --name fsl-dev ${{ secrets.ECR_REPO_URL }}:v1

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fsl-dev
+  namespace: prod
+spec:
+  serviceName: "fsl-dev"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fsl-dev
+  template:
+    metadata:
+      labels:
+        app: fsl-dev
+    spec:
+      containers:
+      - name: fsl-dev
+        image: fsl-dev:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080

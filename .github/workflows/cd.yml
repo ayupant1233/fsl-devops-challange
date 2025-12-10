@@ -33,7 +33,6 @@ jobs:
       - name: Push to ECR
         run: docker push ${{ secrets.ECR_REPO_URL }}:v1
 
-      - uses: actions/checkout@v2 
       - name: Build & Deploy
         env:
             PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}

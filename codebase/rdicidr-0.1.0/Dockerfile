@@ -1,21 +1,21 @@
 FROM node:15 as builder
 
-WORKDIR
+WORKDIR /app
 
-COPY
+COPY package.json package-lock.json ./
 
-RUN 
+RUN npm ci
 
-COPY
+COPY . .
 
-RUN 
+RUN npm run build
 
-FROM
+FROM nginx:1.19-alpine
 
-WORKDIR
+COPY --from=builder /app/build /usr/share/nginx/html
 
-COPY
+RUN sed -i 's/listen       80;/listen 8080;/g' /etc/nginx/conf.d/default.conf
 
-RUN 
+EXPOSE 8080 
 
-ENTRYPOINT 
+CMD ["nginx", "-g", "daemon off;"]
